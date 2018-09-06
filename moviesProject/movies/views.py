@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 import redis
 
-def ask(request):
-    
+def getall(request):
+    return render(request, 'movies/index.html', {'movies': movies})
 
 # Create your views here.
