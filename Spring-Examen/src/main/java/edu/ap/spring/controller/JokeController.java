@@ -51,11 +51,13 @@ public class JokeController {
 		model.addAttribute("joke_string", json_joke.get("joke"));
 		
 		boolean is_al_saved = false;
-		List<Joke> joke_list = repository.findByJoke(json_joke.get("joke").toString());
+		List<Joke> joke_list = (List<Joke>) repository.findAll();
 		for (int i = 0; i < joke_list.size(); i++) {
 			if (joke_list.get(i).getJoke() == json_joke.get("joke").toString()) {
 				is_al_saved = true;
 				System.out.println("al in db");
+			} else {
+				System.out.println("nog niet in db");
 			}
 		}
 		
