@@ -1,5 +1,8 @@
 package edu.ap.spring.controller;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -15,6 +18,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.List;
 
 @Controller
 @Scope("session")
@@ -35,17 +39,29 @@ public class JokeController {
 	@PostMapping("/joke_post")
 	public String joke_post(@RequestParam("voorNaam") String VoorNaam_s, 
 				 			@RequestParam("achterName") String AchterNaam_s,
-			 				Model model) {
+			 				Model model) throws ParseException {
 		
 		
-		String random_joke = callURL("http://api.icndb.com/jokes/random?firstName=" + VoorNaam_s + "&lastName=" + VoorNaam_s);
+		String random_joke = callURL("http://api.icndb.com/jokes/random?firstName=" + VoorNaam_s + "&lastName=" + AchterNaam_s);
 		
+		JSONParser parser = new JSONParser();
+		JSONObject json = (JSONObject) parser.parse(random_joke);
+		JSONObject json_joke = (JSONObject) parser.parse(json.get("value").toString());
 		
-		model.addAttribute("joke_string", random_joke);
+		model.addAttribute("joke_string", json_joke.get("joke"));
 		
-		//if (repository.findByJoke(joke_s) == null) {
+		boolean is_al_saved = false;
+		List<Joke> joke_list = repository.findByJoke(json_joke.get("joke").toString());
+		for (int i = 0; i < joke_list.size(); i++) {
+			if (joke_list.get(i).getJoke() == json_joke.get("joke").toString()) {
+				is_al_saved = true;
+				System.out.println("al in db");
+			}
+		}
+		
+		if (is_al_saved == false) {
 			repository.save(new Joke(random_joke));
-		//}
+		}
 	   
    		return "joke_result";
 	}
